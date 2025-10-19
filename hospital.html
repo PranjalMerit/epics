@@ -18,21 +18,34 @@
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            /* Dark theme background */
+            background-color: #0d1a2e; /* A dark navy blue */
         }
-        /* Style for the custom scrollbar */
+
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+
+        /* Style for the custom scrollbar (dark theme) */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #1a2b46;
             border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #94a3b8;
+            background: #3a5a8e;
             border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #4f7ac4;
         }
         /* Animation for modal popup and interface transition */
         .fade-in {
@@ -44,27 +57,30 @@
         }
         /* Styling for selected items */
         .selected-card {
-            border-color: #2563eb; /* blue-600 */
-            box-shadow: 0 0 0 2px #bfdbfe; /* blue-200 */
+            border-color: #3b82f6; /* brighter blue for dark mode */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
             transform: scale(1.02);
+            background-color: rgba(59, 130, 246, 0.1);
         }
         .sort-btn.active {
-            background-color: #2563eb; /* blue-600 */
+            background-color: #3b82f6;
             color: white;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="text-slate-300">
+    
+    <canvas id="background-canvas"></canvas>
 
-    <div id="app" class="min-h-screen p-4 sm:p-6 lg:p-8">
+    <div id="app" class="min-h-screen p-4 sm:p-6 lg:p-8 relative z-10">
 
         <!-- Interface 1: Selection Screen -->
         <div id="selection-interface" class="max-w-4xl mx-auto fade-in">
             <header class="flex justify-between items-center mb-8">
-                 <div class="text-center flex-grow">
-                    <h1 class="text-3xl font-bold text-slate-900">Find Your Hospital</h1>
-                    <p class="text-slate-500 mt-1">Select your location and the type of care you need.</p>
-                </div>
+                    <div class="text-center flex-grow">
+                        <h1 class="text-3xl font-bold text-white">Find Your Hospital</h1>
+                        <p class="text-slate-400 mt-1">Select your location and the type of care you need.</p>
+                    </div>
                 <button id="my-bookings-btn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap">
                     <i class="ph ph-calendar"></i> My Bookings
                 </button>
@@ -72,21 +88,21 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Location Selection -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-lg shadow-black/20">
                     <div class="flex items-center gap-3 mb-4">
-                        <i class="ph ph-map-trifold text-2xl text-blue-600"></i>
-                        <h2 class="text-xl font-semibold">1. Select Location</h2>
+                        <i class="ph ph-map-trifold text-2xl text-blue-400"></i>
+                        <h2 class="text-xl font-semibold text-white">1. Select Location</h2>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label for="state-select" class="block text-sm font-medium text-slate-700">State</label>
-                            <select id="state-select" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <label for="state-select" class="block text-sm font-medium text-slate-400">State</label>
+                            <select id="state-select" class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 <option value="">Select a State</option>
                             </select>
                         </div>
                         <div>
-                            <label for="city-select" class="block text-sm font-medium text-slate-700">City</label>
-                            <select id="city-select" disabled class="mt-1 block w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50">
+                            <label for="city-select" class="block text-sm font-medium text-slate-400">City</label>
+                            <select id="city-select" disabled class="mt-1 block w-full px-3 py-2 bg-slate-900 border border-slate-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50">
                                 <option value="">Select a City</option>
                             </select>
                         </div>
@@ -94,10 +110,10 @@
                 </div>
 
                 <!-- Hospital Type Selection -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-lg shadow-black/20">
                     <div class="flex items-center gap-3 mb-4">
-                        <i class="ph ph-first-aid-kit text-2xl text-green-600"></i>
-                        <h2 class="text-xl font-semibold">2. Select Hospital Type</h2>
+                        <i class="ph ph-first-aid-kit text-2xl text-green-400"></i>
+                        <h2 class="text-xl font-semibold text-white">2. Select Hospital Type</h2>
                     </div>
                     <div id="hospital-type-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <!-- Types will be dynamically inserted -->
@@ -106,7 +122,7 @@
             </div>
             
             <div class="mt-8 flex justify-center">
-                <button id="find-hospitals-btn" disabled class="w-full md:w-auto bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                <button id="find-hospitals-btn" disabled class="w-full md:w-auto bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                     <i class="ph ph-magnifying-glass"></i> Find Hospitals
                 </button>
             </div>
@@ -116,28 +132,28 @@
         <div id="dashboard-interface" class="hidden fade-in">
              <header class="mb-8 flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-slate-900">Patient Dashboard</h1>
-                    <p id="dashboard-subtitle" class="text-slate-500 mt-1"></p>
+                    <h1 class="text-3xl font-bold text-white">Patient Dashboard</h1>
+                    <p id="dashboard-subtitle" class="text-slate-400 mt-1"></p>
                 </div>
-                <button id="back-to-selection-btn" class="bg-white border border-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-2">
+                <button id="back-to-selection-btn" class="bg-slate-700 border border-slate-600 text-slate-300 font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors flex items-center gap-2">
                     <i class="ph ph-arrow-left"></i> Back
                 </button>
             </header>
 
             <main class="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <!-- Left Column: Hospital Locator -->
-                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                <div class="lg:col-span-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-lg shadow-black/20">
                     <div class="flex items-center justify-between gap-3 mb-4">
                         <div class="flex items-center gap-3">
-                            <i class="ph ph-hospital text-2xl text-blue-600"></i>
-                            <h2 class="text-xl font-semibold">Hospital Results</h2>
+                            <i class="ph ph-hospital text-2xl text-blue-400"></i>
+                            <h2 class="text-xl font-semibold text-white">Hospital Results</h2>
                         </div>
                     </div>
                     <!-- Sorting Controls -->
-                    <div class="flex items-center gap-2 mb-4 border-b border-slate-200 pb-4">
-                        <span class="text-sm font-medium text-slate-600">Sort by:</span>
-                        <button id="sort-distance-btn" class="sort-btn text-xs font-semibold py-1.5 px-3 rounded-full bg-slate-100 hover:bg-blue-100 hover:text-blue-700 transition-colors">Distance</button>
-                        <button id="sort-fees-btn" class="sort-btn text-xs font-semibold py-1.5 px-3 rounded-full bg-slate-100 hover:bg-blue-100 hover:text-blue-700 transition-colors">Fees</button>
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-700 pb-4">
+                        <span class="text-sm font-medium text-slate-400">Sort by:</span>
+                        <button id="sort-distance-btn" class="sort-btn text-xs font-semibold py-1.5 px-3 rounded-full bg-slate-700 hover:bg-blue-500/20 hover:text-blue-300 transition-colors">Distance</button>
+                        <button id="sort-fees-btn" class="sort-btn text-xs font-semibold py-1.5 px-3 rounded-full bg-slate-700 hover:bg-blue-500/20 hover:text-blue-300 transition-colors">Fees</button>
                     </div>
                     <div id="hospital-list" class="space-y-4 h-[550px] overflow-y-auto custom-scrollbar pr-2">
                         <!-- Hospitals will be dynamically inserted here -->
@@ -145,36 +161,36 @@
                 </div>
 
                 <!-- Right Column: Appointment Scheduler -->
-                <div class="lg:col-span-3 bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                <div class="lg:col-span-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-lg shadow-black/20">
                      <div class="flex items-center gap-3 mb-4">
-                        <i class="ph ph-calendar-plus text-2xl text-green-600"></i>
-                        <h2 class="text-xl font-semibold">Appointment Scheduler</h2>
+                        <i class="ph ph-calendar-plus text-2xl text-green-400"></i>
+                        <h2 class="text-xl font-semibold text-white">Appointment Scheduler</h2>
                     </div>
-                    <p id="scheduler-prompt" class="text-sm text-slate-500 mb-4">Select a hospital by clicking its "Book" button to begin.</p>
+                    <p id="scheduler-prompt" class="text-sm text-slate-400 mb-4">Select a hospital by clicking its "Book" button to begin.</p>
                     <div id="scheduler" class="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-40 pointer-events-none">
                         <div id="calendar-container">
                             <div class="flex items-center justify-between mb-4">
-                                <button id="prev-month" class="p-2 rounded-full hover:bg-slate-100 transition-colors"><i class="ph ph-caret-left"></i></button>
-                                <h3 id="month-year" class="font-medium text-center"></h3>
-                                <button id="next-month" class="p-2 rounded-full hover:bg-slate-100 transition-colors"><i class="ph ph-caret-right"></i></button>
+                                <button id="prev-month" class="p-2 rounded-full hover:bg-slate-700 transition-colors"><i class="ph ph-caret-left"></i></button>
+                                <h3 id="month-year" class="font-medium text-center text-white"></h3>
+                                <button id="next-month" class="p-2 rounded-full hover:bg-slate-700 transition-colors"><i class="ph ph-caret-right"></i></button>
                             </div>
                             <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
                         </div>
                         <div id="booking-details">
-                            <h3 class="font-medium mb-2">Available Time Slots</h3>
-                            <p id="time-slot-prompt" class="text-sm text-slate-400">Please select a date.</p>
+                            <h3 class="font-medium mb-2 text-white">Available Time Slots</h3>
+                            <p id="time-slot-prompt" class="text-sm text-slate-500">Please select a date.</p>
                             <div id="time-slots" class="grid grid-cols-3 gap-2 mt-2"></div>
                             <div id="booking-form-container" class="mt-6 hidden">
-                                <h3 class="font-medium mb-4">Patient Details</h3>
+                                <h3 class="font-medium mb-4 text-white">Patient Details</h3>
                                 <form id="booking-form">
                                     <div class="space-y-4">
                                         <div>
-                                            <label for="patient-name" class="block text-sm font-medium text-slate-700">Full Name</label>
-                                            <input type="text" id="patient-name" required class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <label for="patient-name" class="block text-sm font-medium text-slate-400">Full Name</label>
+                                            <input type="text" id="patient-name" required class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         </div>
                                         <div>
-                                            <label for="patient-phone" class="block text-sm font-medium text-slate-700">Phone Number</label>
-                                            <input type="tel" id="patient-phone" required class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <label for="patient-phone" class="block text-sm font-medium text-slate-400">Phone Number</label>
+                                            <input type="tel" id="patient-phone" required class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         </div>
                                         <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
                                             <i class="ph ph-check-circle"></i> Confirm Appointment
@@ -192,10 +208,10 @@
         <div id="bookings-interface" class="max-w-4xl mx-auto hidden fade-in">
             <header class="mb-8 flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-slate-900">My Bookings</h1>
-                    <p class="text-slate-500 mt-1">Here are your upcoming and past appointments.</p>
+                    <h1 class="text-3xl font-bold text-white">My Bookings</h1>
+                    <p class="text-slate-400 mt-1">Here are your upcoming and past appointments.</p>
                 </div>
-                <button id="back-to-main-from-bookings-btn" class="bg-white border border-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-2">
+                <button id="back-to-main-from-bookings-btn" class="bg-slate-700 border border-slate-600 text-slate-300 font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors flex items-center gap-2">
                     <i class="ph ph-arrow-left"></i> Back
                 </button>
             </header>
@@ -207,24 +223,156 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden fade-in">
-        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-sm text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                <i class="ph ph-check text-2xl text-green-600"></i>
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden fade-in z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-8 max-w-sm text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-500/20 mb-4">
+                <i class="ph ph-check text-2xl text-green-400"></i>
             </div>
-            <h3 class="text-lg font-medium text-slate-900">Appointment Confirmed!</h3>
-            <div class="mt-2 text-sm text-slate-500">
+            <h3 class="text-lg font-medium text-white">Appointment Confirmed!</h3>
+            <div class="mt-2 text-sm text-slate-400">
                 <p>Your appointment has been successfully booked.</p>
-                <p id="confirmation-details" class="mt-2 font-medium"></p>
+                <p id="confirmation-details" class="mt-2 font-medium text-slate-200"></p>
             </div>
             <div class="mt-6">
-                <button id="close-modal" class="w-full bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">Done</button>
+                <button id="close-modal" class="w-full bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 transition-colors">Done</button>
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // --- PLEXUS BACKGROUND ANIMATION ---
+            const canvas = document.getElementById('background-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            const MAX_PARTICLES = 400;
+            let mouse = { x: null, y: null };
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function createParticles() {
+                particles = [];
+                const particleCount = Math.floor(canvas.width * canvas.height / 25000); 
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5
+                    });
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    // Mouse interaction
+                    if (mouse.x !== null && mouse.y !== null) {
+                        const dx = p.x - mouse.x;
+                        const dy = p.y - mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const repelForce = 150; // How far the mouse pushes particles
+
+                        if (dist < repelForce) {
+                            const angle = Math.atan2(dy, dx);
+                            const force = (repelForce - dist) / repelForce;
+                            p.vx += force * Math.cos(angle);
+                            p.vy += force * Math.sin(angle);
+                        }
+                    }
+
+                    // Apply friction
+                    p.vx *= 0.97;
+                    p.vy *= 0.97;
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(59, 130, 246, ${1 - dist / 120})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            function initPlexusAnimation() {
+                resizeCanvas();
+                createParticles();
+                animate();
+                window.addEventListener('resize', () => {
+                    resizeCanvas();
+                    createParticles();
+                });
+
+                // --- MOUSE HOVER INTERACTION ---
+                window.addEventListener('mousemove', (event) => {
+                    mouse.x = event.clientX;
+                    mouse.y = event.clientY;
+                });
+                window.addEventListener('mouseleave', () => {
+                    mouse.x = null;
+                    mouse.y = null;
+                });
+
+                
+                // --- CLICK TO MULTIPLY ---
+                canvas.addEventListener('click', (event) => {
+                    if (particles.length >= MAX_PARTICLES) return;
+
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = event.clientX - rect.left;
+                    const mouseY = event.clientY - rect.top;
+
+                    for (let i = 0; i < particles.length; i++) {
+                        const p = particles[i];
+                        const dx = p.x - mouseX;
+                        const dy = p.y - mouseY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 20) { // If click is near a particle
+                            for (let j = 0; j < 5; j++) { // Create 5 new particles
+                                if (particles.length >= MAX_PARTICLES) break;
+                                particles.push({
+                                    x: p.x,
+                                    y: p.y,
+                                    vx: (Math.random() - 0.5) * 1.5, // Burst effect
+                                    vy: (Math.random() - 0.5) * 1.5
+                                });
+                            }
+                            break; // Multiply only the first particle found
+                        }
+                    }
+                });
+            }
+
+
             // --- DATA ---
             const locations = {
                 "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar", "Anand", "Nadiad", "Bharuch", "Mehsana", "Morbi", "Surendranagar", "Gandhidham"],
@@ -236,12 +384,11 @@
                 "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kakinada", "Anantapur", "Eluru", "Ongole", "Nandyal", "Machilipatnam", "Adoni", "Tenali"],
                 "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Kollam", "Thrissur", "Kannur", "Alappuzha", "Palakkad", "Malappuram", "Kottayam", "Kasaragod", "Pathanamthitta", "Idukki", "Wayanad", "Ernakulam"],
                 "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri", "Sambalpur", "Berhampur", "Balasore", "Bhadrak", "Baripada", "Jharsuguda", "Jeypore", "Bargarh", "Angul", "Dhenkanal", "Paradip"],
-                "West Bengal": ["Kolkata", "Howrah", "Asansol", "Siliguri", "Durgapur", "Bardhaman", "Malda", "Bahrampur", "Habra", "Kharagpur", "Shantipur", "Haldia", "Krishnanagar", "Midnapore", "Raiganj"],
+                "West Bengal": ["Kolkata", "Howrah", "Asansol", "Siliguri", "Durgapur", "Bardhaman", "Malda", "Bahrampur", "Habra", "Khargpur", "Shantipur", "Haldia", "Krishnanagar", "Midnapore", "Raiganj"],
                 "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Arrah", "Begusarai", "Katihar", "Munger", "Chhapra", "Danapur", "Bettiah", "Saharsa", "Hajipur"],
                 "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Jorhat", "Nagaon", "Tinsukia", "Tezpur", "Bongaigaon", "Dhubri", "Diphu", "Goalpara", "Sivasagar", "Karimganj", "North Lakhimpur", "Lanka"],
                 "Haryana": ["Faridabad", "Gurugram", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar", "Karnal", "Sonipat", "Panchkula", "Bhiwani", "Sirsa", "Jind", "Thanesar", "Kaithal"],
                 "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali", "Batala", "Pathankot", "Moga", "Abohar", "Khanna", "Phagwara", "Muktsar", "Barnala"],
-
                 "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Sopore", "Kathua", "Rajouri", "Udhampur", "Pulwama", "Kulgam", "Poonch", "Bandipora", "Ganderbal", "Doda", "Kishtwar"]
             };
 
@@ -250,7 +397,6 @@
             let hospitals = [];
             
             // --- DYNAMIC HOSPITAL DATA GENERATION ---
-            // This function creates a large, diverse, and realistic dataset
             function generateHospitalData() {
                 const generatedHospitals = [];
                 const hospitalNamePrefixes = {
@@ -276,7 +422,7 @@
                                 const distance = (Math.random() * 15 + 1).toFixed(1);
                                 const rating = (Math.random() * 0.9 + 4.1).toFixed(1);
                                 const reviews = Math.floor(Math.random() * 1500 + 50);
-                                const fees = (Math.floor(Math.random() * 25) + 10) * 50; // Fees from 500 to 1700 in increments of 50
+                                const fees = (Math.floor(Math.random() * 25) + 10) * 50;
                                 const phonePart1 = Math.floor(Math.random() * 900 + 100);
                                 const phonePart2 = Math.floor(Math.random() * 900 + 100);
                                 const phonePart3 = Math.floor(Math.random() * 9000 + 1000);
@@ -358,7 +504,7 @@
             function renderBookings() {
                 bookingsListEl.innerHTML = '';
                 if (bookings.length === 0) {
-                    bookingsListEl.innerHTML = `<div class="p-4 text-center text-slate-500 bg-white rounded-xl">You have no appointments.</div>`;
+                    bookingsListEl.innerHTML = `<div class="p-4 text-center text-slate-500 bg-slate-800/50 border border-slate-700 rounded-xl">You have no appointments.</div>`;
                     return;
                 }
 
@@ -369,7 +515,7 @@
 
                 if (upcomingBookings.length > 0) {
                     const upcomingHeader = document.createElement('h2');
-                    upcomingHeader.className = 'text-xl font-semibold text-slate-800 mb-4';
+                    upcomingHeader.className = 'text-xl font-semibold text-white mb-4';
                     upcomingHeader.textContent = 'Upcoming Appointments';
                     bookingsListEl.appendChild(upcomingHeader);
                     upcomingBookings.forEach(booking => bookingsListEl.appendChild(createBookingCard(booking, false)));
@@ -377,7 +523,7 @@
 
                 if (pastBookings.length > 0) {
                     const pastHeader = document.createElement('h2');
-                    pastHeader.className = 'text-xl font-semibold text-slate-800 mt-8 mb-4';
+                    pastHeader.className = 'text-xl font-semibold text-white mt-8 mb-4';
                     pastHeader.textContent = 'Past Appointments';
                     bookingsListEl.appendChild(pastHeader);
                     pastBookings.forEach(booking => bookingsListEl.appendChild(createBookingCard(booking, true)));
@@ -386,20 +532,20 @@
 
             function createBookingCard(booking, isPast) {
                 const card = document.createElement('div');
-                card.className = `bg-white p-5 rounded-xl shadow-lg shadow-slate-200/50 flex items-center gap-5 ${isPast ? 'opacity-60' : ''}`;
+                card.className = `bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-5 rounded-xl shadow-lg shadow-black/20 flex items-center gap-5 ${isPast ? 'opacity-50' : ''}`;
                 const date = new Date(booking.date);
                 const day = date.getDate();
                 const month = date.toLocaleString('default', { month: 'short' });
 
                 card.innerHTML = `
-                    <div class="flex flex-col items-center justify-center bg-blue-50 text-blue-700 font-bold p-3 rounded-lg w-20 h-20">
+                    <div class="flex flex-col items-center justify-center bg-blue-500/10 text-blue-300 font-bold p-3 rounded-lg w-20 h-20">
                         <span class="text-3xl">${day}</span>
                         <span class="text-sm">${month.toUpperCase()}</span>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-lg text-slate-900">${booking.hospital.name}</h3>
-                        <p class="text-slate-600">Appointment with ${booking.patientName}</p>
-                        <div class="mt-2 text-sm text-slate-500 flex items-center gap-4">
+                        <h3 class="font-semibold text-lg text-white">${booking.hospital.name}</h3>
+                        <p class="text-slate-400">Appointment with ${booking.patientName}</p>
+                        <div class="mt-2 text-sm text-slate-400 flex items-center gap-4">
                             <span><i class="ph-fill ph-clock align-middle mr-1"></i>${booking.time}</span>
                             <span><i class="ph-fill ph-map-pin align-middle mr-1"></i>${booking.hospital.city}</span>
                         </div>
@@ -415,7 +561,6 @@
             }
 
             function populateStates() {
-                // Sort states alphabetically before populating
                 const sortedStates = Object.keys(locations).sort();
                 sortedStates.forEach(state => {
                     const option = document.createElement('option');
@@ -428,7 +573,6 @@
             function populateCities(state) {
                 citySelect.innerHTML = '<option value="">Select a City</option>';
                 if (state && locations[state]) {
-                    // Sort cities alphabetically
                     const sortedCities = locations[state].sort();
                     sortedCities.forEach(city => {
                         const option = document.createElement('option');
@@ -447,7 +591,7 @@
                     const button = document.createElement('button');
                     button.textContent = type;
                     button.dataset.type = type;
-                    button.className = 'p-2 border border-slate-300 rounded-lg text-sm text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-200';
+                    button.className = 'p-2 border border-slate-600 text-slate-300 rounded-lg text-sm text-center hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-200';
                     hospitalTypeGrid.appendChild(button);
                 });
             }
@@ -458,7 +602,6 @@
                 
                 dashboardSubtitle.textContent = `Showing ${selectedType} hospitals in ${selectedCity}, ${selectedState}.`;
 
-                // --- Sorting Logic ---
                 if (currentSort === 'distance') {
                     filtered.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
                     sortDistanceBtn.classList.add('active');
@@ -473,38 +616,141 @@
                 }
 
                 if (filtered.length === 0) {
-                    hospitalListEl.innerHTML = `<div class="p-4 text-center text-slate-500">No hospitals found matching your criteria.</div>`;
+                    hospitalListEl.innerHTML = `<div class="p-4 text-center text-slate-400">No hospitals found matching your criteria.</div>`;
                     return;
                 }
 
                 filtered.forEach((hospital, index) => {
                     const hospitalCard = document.createElement('div');
-                    hospitalCard.className = 'p-4 border border-slate-200 rounded-xl hover:shadow-md hover:border-blue-300 transition-all';
+                    hospitalCard.className = 'p-4 border border-slate-700 bg-slate-800/30 rounded-xl hover:shadow-lg hover:border-blue-500/50 transition-all';
                     hospitalCard.innerHTML = `
                         <div class="flex justify-between items-start gap-3">
                             <div>
-                                <h4 class="font-semibold">${hospital.name}</h4>
-                                <div class="flex items-center gap-1 text-sm text-amber-500 my-1.5">
+                                <h4 class="font-semibold text-white">${hospital.name}</h4>
+                                <div class="flex items-center gap-1 text-sm text-amber-400 my-1.5">
                                     <i class="ph-fill ph-star"></i>
-                                    <span class="font-bold text-slate-700">${hospital.rating}</span>
-                                    <span class="text-slate-500">(${hospital.reviews} reviews)</span>
+                                    <span class="font-bold text-slate-200">${hospital.rating}</span>
+                                    <span class="text-slate-400">(${hospital.reviews} reviews)</span>
                                 </div>
-                                <div class="mt-2 space-y-1 text-sm text-slate-600">
-                                   <p><i class="ph-fill ph-phone align-middle text-slate-400 mr-1"></i> ${hospital.phone}</p>
-                                   <p><i class="ph-fill ph-clock align-middle text-slate-400 mr-1"></i> ${hospital.timings}</p>
-                                   <p><i class="ph-fill ph-map-pin align-middle text-slate-400 mr-1"></i> ${hospital.distance} away</p>
-                                   <p><i class="ph-fill ph-currency-inr align-middle text-slate-400 mr-1"></i> ₹${hospital.fees} Visiting Fee</p>
+                                <div class="mt-2 space-y-1 text-sm text-slate-400">
+                                   <p><i class="ph-fill ph-phone align-middle text-slate-500 mr-1"></i> ${hospital.phone}</p>
+                                   <p><i class="ph-fill ph-clock align-middle text-slate-500 mr-1"></i> ${hospital.timings}</p>
+                                   <p><i class="ph-fill ph-map-pin align-middle text-slate-500 mr-1"></i> ${hospital.distance} away</p>
+                                   <p><i class="ph-fill ph-currency-inr align-middle text-slate-500 mr-1"></i> ₹${hospital.fees} Visiting Fee</p>
                                 </div>
                             </div>
-                            <button data-hospital-name="${hospital.name}" class="book-btn text-xs bg-blue-500 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap">Book</button>
+                            <button data-hospital-name="${hospital.name}" class="book-btn text-xs bg-blue-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap">Book</button>
                         </div>
                     `;
                     hospitalListEl.appendChild(hospitalCard);
                 });
             }
 
-            function renderCalendar() { /* ... unchanged ... */ }
-            function renderTimeSlots() { /* ... unchanged ... */ }
+            function renderCalendar() {
+                calendarGridEl.innerHTML = '';
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+
+                monthYearEl.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+
+                const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                daysOfWeek.forEach(day => {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'font-bold text-slate-500';
+                    dayEl.textContent = day;
+                    calendarGridEl.appendChild(dayEl);
+                });
+                
+                for (let i = 0; i < new Date(year, month, 1).getDay(); i++) {
+                    calendarGridEl.appendChild(document.createElement('div'));
+                }
+
+                for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
+                    const dayEl = document.createElement('button');
+                    dayEl.textContent = day;
+                    dayEl.className = 'p-2 rounded-full hover:bg-slate-700 transition-colors';
+
+                    const today = new Date();
+                    const date = new Date(year, month, day);
+
+                    if (date.setHours(0,0,0,0) < today.setHours(0,0,0,0)) {
+                        dayEl.disabled = true;
+                        dayEl.classList.add('text-slate-600', 'cursor-not-allowed');
+                    } else if (selectedDate && date.getTime() === selectedDate.getTime()) {
+                        dayEl.classList.add('bg-blue-600', 'text-white', 'font-semibold');
+                    } else if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
+                         dayEl.classList.add('text-blue-400', 'font-bold');
+                    }
+
+                    dayEl.addEventListener('click', () => {
+                        selectedDate = new Date(year, month, day);
+                        selectedTime = null;
+                        renderCalendar();
+                        renderTimeSlots();
+                    });
+                    calendarGridEl.appendChild(dayEl);
+                }
+            }
+            
+            function renderTimeSlots() {
+                timeSlotsEl.innerHTML = '';
+                if (!selectedDate) {
+                    timeSlotPromptEl.classList.remove('hidden');
+                    bookingFormContainerEl.classList.add('hidden');
+                    return;
+                }
+                
+                timeSlotPromptEl.classList.add('hidden');
+                timeSlotsData.forEach(time => {
+                    const timeSlotBtn = document.createElement('button');
+                    timeSlotBtn.textContent = time;
+                    timeSlotBtn.className = 'border border-slate-600 py-2 rounded-lg text-sm hover:border-blue-500 hover:bg-blue-500/10 transition-colors';
+                    if (time === selectedTime) {
+                        timeSlotBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                    }
+                    timeSlotBtn.addEventListener('click', () => {
+                        selectedTime = time;
+                        renderTimeSlots();
+                        if (selectedHospital) {
+                            bookingFormContainerEl.classList.remove('hidden');
+                        } else {
+                            // Using a custom modal/toast in a real app would be better than alert
+                            // but for this scope, alert is sufficient.
+                            const customAlert = document.createElement('div');
+                            customAlert.textContent = "Please select a hospital first by clicking the 'Book' button.";
+                            customAlert.style.cssText = `
+                                position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+                                background-color: #ef4444; color: white; padding: 12px 20px; 
+                                border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                transition: opacity 0.5s;
+                            `;
+                            document.body.appendChild(customAlert);
+                            setTimeout(() => {
+                                customAlert.style.opacity = '0';
+                                setTimeout(() => customAlert.remove(), 500);
+                            }, 3000);
+                            
+                            selectedTime = null; // reset time selection
+                            renderTimeSlots();
+                        }
+                    });
+                    timeSlotsEl.appendChild(timeSlotBtn);
+                });
+            }
+
+            // --- Reusable function to close modal and reset state ---
+            function closeAndResetModal() {
+                modalEl.classList.add('hidden');
+                selectedDate = null;
+                selectedTime = null;
+                selectedHospital = null;
+                bookingFormEl.reset();
+                bookingFormContainerEl.classList.add('hidden');
+                schedulerEl.classList.add('opacity-40', 'pointer-events-none');
+                schedulerPromptEl.classList.remove('hidden');
+                renderCalendar();
+                renderTimeSlots();
+            }
             
             // --- EVENT LISTENERS ---
             myBookingsBtn.addEventListener('click', () => {
@@ -537,11 +783,11 @@
                     const type = e.target.dataset.type;
                     if (selectedType === type) {
                         selectedType = null;
-                        e.target.classList.remove('selected-card', 'bg-blue-100');
+                        e.target.classList.remove('selected-card');
                     } else {
                         selectedType = type;
-                        hospitalTypeGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('selected-card', 'bg-blue-100'));
-                        e.target.classList.add('selected-card', 'bg-blue-100');
+                        hospitalTypeGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('selected-card'));
+                        e.target.classList.add('selected-card');
                     }
                     checkSelections();
                 }
@@ -550,29 +796,40 @@
             findHospitalsBtn.addEventListener('click', () => {
                 selectionInterface.classList.add('hidden');
                 dashboardInterface.classList.remove('hidden');
-                currentSort = 'default'; // Reset sort on new search
+                currentSort = 'default';
                 renderFilteredHospitals();
             });
 
+            // FIX: Updated back button to also close the modal
             backToSelectionBtn.addEventListener('click', () => {
                 dashboardInterface.classList.add('hidden');
                 selectionInterface.classList.remove('hidden');
-                schedulerEl.classList.add('opacity-40', 'pointer-events-none');
-                schedulerPromptEl.classList.remove('hidden');
-                selectedHospital = null;
+                // This function now correctly hides the modal AND resets the scheduler
+                closeAndResetModal();
                 currentSort = 'default';
             });
 
             hospitalListEl.addEventListener('click', (e) => {
                 if (e.target.classList.contains('book-btn')) {
                     const hospitalName = e.target.dataset.hospitalName;
-                    const hospitalCity = e.target.closest('.p-4').querySelector('p:nth-of-type(3)').textContent.includes(selectedCity)
-                    
                     selectedHospital = hospitals.find(h => h.name === hospitalName && h.city === selectedCity);
-
                     schedulerEl.classList.remove('opacity-40', 'pointer-events-none');
                     schedulerPromptEl.classList.add('hidden');
-                    alert(`Selected ${selectedHospital.name}. Please now choose a date and time.`);
+                    
+                    const customAlert = document.createElement('div');
+                    customAlert.innerHTML = `Selected <strong>${selectedHospital.name}</strong>. Please now choose a date and time.`;
+                     customAlert.style.cssText = `
+                        position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+                        background-color: #3b82f6; color: white; padding: 12px 20px; 
+                        border-radius: 8px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        transition: opacity 0.5s;
+                    `;
+                    document.body.appendChild(customAlert);
+                    setTimeout(() => {
+                        customAlert.style.opacity = '0';
+                        setTimeout(() => customAlert.remove(), 500);
+                    }, 3000);
+
                     document.getElementById('scheduler').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
@@ -591,7 +848,6 @@
                 e.preventDefault();
                 const patientName = document.getElementById('patient-name').value;
                 if (!patientName) return;
-
                 const bookingDetails = {
                     patientName: patientName,
                     hospital: selectedHospital,
@@ -599,7 +855,6 @@
                     time: selectedTime
                 };
                 saveBooking(bookingDetails);
-
                 const dateString = selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 confirmationDetailsEl.innerHTML = `
                     For: <strong>${patientName}</strong><br>
@@ -609,99 +864,15 @@
                 modalEl.classList.remove('hidden');
             });
             
-            closeModalBtn.addEventListener('click', () => {
-                modalEl.classList.add('hidden');
-                selectedDate = null;
-                selectedTime = null;
-                selectedHospital = null;
-                bookingFormEl.reset();
-                bookingFormContainerEl.classList.add('hidden');
-                schedulerEl.classList.add('opacity-40', 'pointer-events-none');
-                schedulerPromptEl.classList.remove('hidden');
-                renderCalendar();
-                renderTimeSlots();
-            });
-
-            // ---UNCHANGED CALENDAR & TIMESLOT LOGIC ---
-             function renderCalendar() {
-                calendarGridEl.innerHTML = '';
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-
-                monthYearEl.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
-
-                const firstDayOfMonth = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-                daysOfWeek.forEach(day => {
-                    const dayEl = document.createElement('div');
-                    dayEl.className = 'font-bold text-slate-500';
-                    dayEl.textContent = day;
-                    calendarGridEl.appendChild(dayEl);
-                });
-                
-                for (let i = 0; i < firstDayOfMonth; i++) {
-                    calendarGridEl.appendChild(document.createElement('div'));
-                }
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dayEl = document.createElement('button');
-                    dayEl.textContent = day;
-                    dayEl.className = 'p-2 rounded-full hover:bg-slate-100 transition-colors';
-
-                    const today = new Date();
-                    const date = new Date(year, month, day);
-
-                    if (date.setHours(0,0,0,0) < today.setHours(0,0,0,0)) {
-                        dayEl.disabled = true;
-                        dayEl.classList.add('text-slate-300', 'cursor-not-allowed');
-                    } else if (selectedDate && date.getTime() === selectedDate.getTime()) {
-                        dayEl.classList.add('bg-blue-600', 'text-white', 'font-semibold');
-                    } else if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
-                         dayEl.classList.add('text-blue-600', 'font-bold');
-                    }
-
-                    dayEl.addEventListener('click', () => {
-                        selectedDate = new Date(year, month, day);
-                        selectedTime = null;
-                        renderCalendar();
-                        renderTimeSlots();
-                    });
-                    calendarGridEl.appendChild(dayEl);
-                }
-            }
+            // Updated the "Done" button to use the new reusable function
+            closeModalBtn.addEventListener('click', closeAndResetModal);
             
-            function renderTimeSlots() {
-                timeSlotsEl.innerHTML = '';
-                if (!selectedDate) {
-                    timeSlotPromptEl.classList.remove('hidden');
-                    bookingFormContainerEl.classList.add('hidden');
-                    return;
+            // FIX: Added listener to close modal on overlay click
+            modalEl.addEventListener('click', (e) => {
+                if (e.target === modalEl) {
+                    closeAndResetModal();
                 }
-                
-                timeSlotPromptEl.classList.add('hidden');
-                timeSlotsData.forEach(time => {
-                    const timeSlotBtn = document.createElement('button');
-                    timeSlotBtn.textContent = time;
-                    timeSlotBtn.className = 'border border-slate-300 py-2 rounded-lg text-sm hover:border-blue-500 hover:bg-blue-50 transition-colors';
-                    if (time === selectedTime) {
-                        timeSlotBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-                    }
-                    timeSlotBtn.addEventListener('click', () => {
-                        selectedTime = time;
-                        renderTimeSlots();
-                        if (selectedHospital) {
-                            bookingFormContainerEl.classList.remove('hidden');
-                        } else {
-                            alert("Please select a hospital first by clicking the 'Book' button.");
-                            selectedTime = null; // reset time selection
-                            renderTimeSlots();
-                        }
-                    });
-                    timeSlotsEl.appendChild(timeSlotBtn);
-                });
-            }
+            });
             
             prevMonthBtn.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
@@ -714,6 +885,7 @@
             });
 
             // --- INITIALIZATION ---
+            initPlexusAnimation(); // Initialize the new background
             loadBookings();
             populateStates();
             populateHospitalTypes();
@@ -722,4 +894,3 @@
     </script>
 </body>
 </html>
-
