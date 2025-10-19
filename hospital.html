@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons for UI elements -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* Custom styles for the dashboard */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Style for the custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Animation for modal popup and interface transition */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Styling for selected items */
+        .selected-card {
+            border-color: #2563eb; /* blue-600 */
+            box-shadow: 0 0 0 2px #bfdbfe; /* blue-200 */
+            transform: scale(1.02);
+        }
+        .sort-btn.active {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="min-h-screen p-4 sm:p-6 lg:p-8">
+
+        <!-- Interface 1: Selection Screen -->
+        <div id="selection-interface" class="max-w-4xl mx-auto fade-in">
+            <header class="flex justify-between items-center mb-8">
+                 <div class="text-center flex-grow">
+                    <h1 class="text-3xl font-bold text-slate-900">Find Your Hospital</h1>
+                    <p class="text-slate-500 mt-1">Select your location and the type of care you need.</p>
+                </div>
+                <button id="my-bookings-btn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i class="ph ph-calendar"></i> My Bookings
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Location Selection -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="ph ph-map-trifold text-2xl text-blue-600"></i>
+                        <h2 class="text-xl font-semibold">1. Select Location</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="state-select" class="block text-sm font-medium text-slate-700">State</label>
+                            <select id="state-select" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="">Select a State</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="city-select" class="block text-sm font-medium text-slate-700">City</label>
+                            <select id="city-select" disabled class="mt-1 block w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50">
+                                <option value="">Select a City</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hospital Type Selection -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="ph ph-first-aid-kit text-2xl text-green-600"></i>
+                        <h2 class="text-xl font-semibold">2. Select Hospital Type</h2>
+                    </div>
+                    <div id="hospital-type-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <!-- Types will be dynamically inserted -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-center">
+                <button id="find-hospitals-btn" disabled class="w-full md:w-auto bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <i class="ph ph-magnifying-glass"></i> Find Hospitals
+                </button>
+            </div>
+        </div>
+
+        <!-- Interface 2: Dashboard -->
+        <div id="dashboard-interface" class="hidden fade-in">
+             <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Patient Dashboard</h1>
+                    <p id="dashboard-subtitle" class="text-slate-500 mt-1"></p>
+                </div>
+                <button id="back-to-selection-btn" class="bg-white border border-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-2">
+                    <i class="ph ph-arrow-left"></i> Back
+                </button>
+            </header>
+
+            <main class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <!-- Left Column: Hospital Locator -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <i class="ph ph-hospital text-2xl text-blue-600"></i>
+                            <h2 class="text-xl font-semibold">Hospital Results</h2>
+                        </div>
+                    </div>
+                    <!-- Sorting Controls -->
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-200 pb-4">
+                        <span class="text-sm font-medium text-slate-600">Sort by:</span>
+                        <button id="sort-distance-btn" class="sort-btn text-xs font-semibold py-1.5 px-3 rounded-full bg-slate-100 hover:bg-blue-100 hover:text-blue-700 transition-colors">Distance</button>
+                        <button id="sort-fees-btn" class="sort-btn text-xs font-semibold py-1.5 px-3 rounded-full bg-slate-100 hover:bg-blue-100 hover:text-blue-700 transition-colors">Fees</button>
+                    </div>
+                    <div id="hospital-list" class="space-y-4 h-[550px] overflow-y-auto custom-scrollbar pr-2">
+                        <!-- Hospitals will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Appointment Scheduler -->
+                <div class="lg:col-span-3 bg-white p-6 rounded-2xl shadow-lg shadow-slate-200/50">
+                     <div class="flex items-center gap-3 mb-4">
+                        <i class="ph ph-calendar-plus text-2xl text-green-600"></i>
+                        <h2 class="text-xl font-semibold">Appointment Scheduler</h2>
+                    </div>
+                    <p id="scheduler-prompt" class="text-sm text-slate-500 mb-4">Select a hospital by clicking its "Book" button to begin.</p>
+                    <div id="scheduler" class="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-40 pointer-events-none">
+                        <div id="calendar-container">
+                            <div class="flex items-center justify-between mb-4">
+                                <button id="prev-month" class="p-2 rounded-full hover:bg-slate-100 transition-colors"><i class="ph ph-caret-left"></i></button>
+                                <h3 id="month-year" class="font-medium text-center"></h3>
+                                <button id="next-month" class="p-2 rounded-full hover:bg-slate-100 transition-colors"><i class="ph ph-caret-right"></i></button>
+                            </div>
+                            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
+                        </div>
+                        <div id="booking-details">
+                            <h3 class="font-medium mb-2">Available Time Slots</h3>
+                            <p id="time-slot-prompt" class="text-sm text-slate-400">Please select a date.</p>
+                            <div id="time-slots" class="grid grid-cols-3 gap-2 mt-2"></div>
+                            <div id="booking-form-container" class="mt-6 hidden">
+                                <h3 class="font-medium mb-4">Patient Details</h3>
+                                <form id="booking-form">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="patient-name" class="block text-sm font-medium text-slate-700">Full Name</label>
+                                            <input type="text" id="patient-name" required class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="patient-phone" class="block text-sm font-medium text-slate-700">Phone Number</label>
+                                            <input type="tel" id="patient-phone" required class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                                            <i class="ph ph-check-circle"></i> Confirm Appointment
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Interface 3: My Bookings -->
+        <div id="bookings-interface" class="max-w-4xl mx-auto hidden fade-in">
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">My Bookings</h1>
+                    <p class="text-slate-500 mt-1">Here are your upcoming and past appointments.</p>
+                </div>
+                <button id="back-to-main-from-bookings-btn" class="bg-white border border-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-2">
+                    <i class="ph ph-arrow-left"></i> Back
+                </button>
+            </header>
+            <div id="bookings-list" class="space-y-6">
+                <!-- Bookings will be dynamically inserted here -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden fade-in">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-sm text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <i class="ph ph-check text-2xl text-green-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900">Appointment Confirmed!</h3>
+            <div class="mt-2 text-sm text-slate-500">
+                <p>Your appointment has been successfully booked.</p>
+                <p id="confirmation-details" class="mt-2 font-medium"></p>
+            </div>
+            <div class="mt-6">
+                <button id="close-modal" class="w-full bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            const locations = {
+                "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar", "Anand", "Nadiad", "Bharuch", "Mehsana", "Morbi", "Surendranagar", "Gandhidham"],
+                "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad", "Solapur", "Amravati", "Navi Mumbai", "Kolhapur", "Sangli", "Jalgaon", "Akola", "Latur", "Dhule"],
+                "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner", "Ajmer", "Alwar", "Bhilwara", "Sikar", "Pali", "Ganganagar", "Bharatpur", "Chittorgarh", "Hanumangarh", "Dausa"],
+                "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna", "Ratlam", "Rewa", "Murwara", "Singrauli", "Burhanpur", "Khandwa", "Bhind"],
+                "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly", "Aligarh", "Moradabad", "Saharanpur", "Noida", "Firozabad", "Jhansi", "Muzaffarnagar"],
+                "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Khammam", "Karimnagar", "Ramagundam", "Mahbubnagar", "Nalgonda", "Adilabad", "Suryapet", "Miryalaguda", "Jagtial", "Siddipet", "Mancherial", "Bodhan"],
+                "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kakinada", "Anantapur", "Eluru", "Ongole", "Nandyal", "Machilipatnam", "Adoni", "Tenali"],
+                "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Kollam", "Thrissur", "Kannur", "Alappuzha", "Palakkad", "Malappuram", "Kottayam", "Kasaragod", "Pathanamthitta", "Idukki", "Wayanad", "Ernakulam"],
+                "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri", "Sambalpur", "Berhampur", "Balasore", "Bhadrak", "Baripada", "Jharsuguda", "Jeypore", "Bargarh", "Angul", "Dhenkanal", "Paradip"],
+                "West Bengal": ["Kolkata", "Howrah", "Asansol", "Siliguri", "Durgapur", "Bardhaman", "Malda", "Bahrampur", "Habra", "Kharagpur", "Shantipur", "Haldia", "Krishnanagar", "Midnapore", "Raiganj"],
+                "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Arrah", "Begusarai", "Katihar", "Munger", "Chhapra", "Danapur", "Bettiah", "Saharsa", "Hajipur"],
+                "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Jorhat", "Nagaon", "Tinsukia", "Tezpur", "Bongaigaon", "Dhubri", "Diphu", "Goalpara", "Sivasagar", "Karimganj", "North Lakhimpur", "Lanka"],
+                "Haryana": ["Faridabad", "Gurugram", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar", "Karnal", "Sonipat", "Panchkula", "Bhiwani", "Sirsa", "Jind", "Thanesar", "Kaithal"],
+                "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali", "Batala", "Pathankot", "Moga", "Abohar", "Khanna", "Phagwara", "Muktsar", "Barnala"],
+
+                "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Sopore", "Kathua", "Rajouri", "Udhampur", "Pulwama", "Kulgam", "Poonch", "Bandipora", "Ganderbal", "Doda", "Kishtwar"]
+            };
+
+            const hospitalTypes = ["Multi-speciality", "Cardiology", "General", "Eye", "Child", "Orthopedic", "Dentist"];
+            
+            let hospitals = [];
+            
+            // --- DYNAMIC HOSPITAL DATA GENERATION ---
+            // This function creates a large, diverse, and realistic dataset
+            function generateHospitalData() {
+                const generatedHospitals = [];
+                const hospitalNamePrefixes = {
+                    "Multi-speciality": ["Global", "Apex", "Sunshine", "United", "Zenith", "Pinnacle", "Sterling", "Continental", "Fortis", "Apollo"],
+                    "Cardiology": ["HeartCare", "CardioCare", "Pulse", "Rhythm", "Noble Heart", "LifeLine Cardiac", "Astra Heart", "Vascular Institute", "Cardia", "Prime Heart"],
+                    "General": ["City General", "Community", "St. John's", "People's", "Metro", "National", "Public", "Royal", "Central", "Regional"],
+                    "Eye": ["VisionCare", "Netra Jyoti", "The Eye Foundation", "ClearSight", "Focus", "Laser Eye", "Retina", "Vision Point", "OcuPlus", "Insight"],
+                    "Child": ["Little Stars", "Rainbow", "Pebbles", "Kiddie Care", "Sunshine Kids", "Angel", "Small Wonders", "Chirayu", "Blossom", "Tiny Tots"],
+                    "Orthopedic": ["Bone & Joint", "OrthoCare", "Joints & Spine", "Mobility", "Action Ortho", "FlexiJoint", "SpineCare", "Axiom Ortho", "Precision", "Restore"],
+                    "Dentist": ["SmileCare", "Dental Studio", "Perfect Smile", "32 Pearls", "Ivory", "Dental Wellness", "Oracare", "Smile Design", "The Dental Hub", "Clove"]
+                };
+                
+                const hospitalNameSuffixes = ["Hospital", "Institute", "Medical Center", "Clinic", "Care Center", "Foundation", "Group", "Speciality Center"];
+
+                for (const state in locations) {
+                    for (const city of locations[state]) {
+                        for (const type of hospitalTypes) {
+                            for (let i = 1; i <= 10; i++) {
+                                const prefix = hospitalNamePrefixes[type][i-1];
+                                const suffix = hospitalNameSuffixes[Math.floor(Math.random() * hospitalNameSuffixes.length)];
+                                const name = `${prefix} ${city} ${suffix}`;
+                                
+                                const distance = (Math.random() * 15 + 1).toFixed(1);
+                                const rating = (Math.random() * 0.9 + 4.1).toFixed(1);
+                                const reviews = Math.floor(Math.random() * 1500 + 50);
+                                const fees = (Math.floor(Math.random() * 25) + 10) * 50; // Fees from 500 to 1700 in increments of 50
+                                const phonePart1 = Math.floor(Math.random() * 900 + 100);
+                                const phonePart2 = Math.floor(Math.random() * 900 + 100);
+                                const phonePart3 = Math.floor(Math.random() * 9000 + 1000);
+
+                                generatedHospitals.push({
+                                    name: name,
+                                    state: state,
+                                    city: city,
+                                    type: type,
+                                    distance: `${distance} km`,
+                                    phone: `+91 ${phonePart1} ${phonePart2} ${phonePart3}`,
+                                    timings: Math.random() > 0.3 ? "24 Hours" : "9:00 AM - 9:00 PM",
+                                    rating: parseFloat(rating),
+                                    reviews: reviews,
+                                    fees: fees
+                                });
+                            }
+                        }
+                    }
+                }
+                return generatedHospitals;
+            }
+
+            hospitals = generateHospitalData();
+
+
+            const timeSlotsData = ["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM", "04:00 PM"];
+
+            // --- STATE ---
+            let currentDate = new Date();
+            let selectedState = null, selectedCity = null, selectedType = null;
+            let selectedDate = null, selectedTime = null, selectedHospital = null;
+            let currentSort = 'default'; // 'default', 'distance', 'fees'
+            let bookings = [];
+            
+            // --- DOM ELEMENTS ---
+            const selectionInterface = document.getElementById('selection-interface');
+            const dashboardInterface = document.getElementById('dashboard-interface');
+            const bookingsInterface = document.getElementById('bookings-interface');
+            const stateSelect = document.getElementById('state-select');
+            const citySelect = document.getElementById('city-select');
+            const hospitalTypeGrid = document.getElementById('hospital-type-grid');
+            const findHospitalsBtn = document.getElementById('find-hospitals-btn');
+            const backToSelectionBtn = document.getElementById('back-to-selection-btn');
+            const dashboardSubtitle = document.getElementById('dashboard-subtitle');
+            const hospitalListEl = document.getElementById('hospital-list');
+            const schedulerEl = document.getElementById('scheduler');
+            const schedulerPromptEl = document.getElementById('scheduler-prompt');
+            const calendarGridEl = document.getElementById('calendar-grid');
+            const monthYearEl = document.getElementById('month-year');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const timeSlotsEl = document.getElementById('time-slots');
+            const timeSlotPromptEl = document.getElementById('time-slot-prompt');
+            const bookingFormContainerEl = document.getElementById('booking-form-container');
+            const bookingFormEl = document.getElementById('booking-form');
+            const modalEl = document.getElementById('confirmation-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const confirmationDetailsEl = document.getElementById('confirmation-details');
+            const sortDistanceBtn = document.getElementById('sort-distance-btn');
+            const sortFeesBtn = document.getElementById('sort-fees-btn');
+            const myBookingsBtn = document.getElementById('my-bookings-btn');
+            const bookingsListEl = document.getElementById('bookings-list');
+            const backToMainFromBookingsBtn = document.getElementById('back-to-main-from-bookings-btn');
+
+            // --- BOOKING FUNCTIONS ---
+            function saveBooking(bookingDetails) {
+                bookings.push(bookingDetails);
+                localStorage.setItem('hospitalBookings', JSON.stringify(bookings));
+            }
+
+            function loadBookings() {
+                const storedBookings = localStorage.getItem('hospitalBookings');
+                if (storedBookings) {
+                    bookings = JSON.parse(storedBookings);
+                }
+            }
+
+            function renderBookings() {
+                bookingsListEl.innerHTML = '';
+                if (bookings.length === 0) {
+                    bookingsListEl.innerHTML = `<div class="p-4 text-center text-slate-500 bg-white rounded-xl">You have no appointments.</div>`;
+                    return;
+                }
+
+                const sortedBookings = bookings.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                const upcomingBookings = sortedBookings.filter(b => new Date(b.date) >= new Date().setHours(0,0,0,0));
+                const pastBookings = sortedBookings.filter(b => new Date(b.date) < new Date().setHours(0,0,0,0));
+
+                if (upcomingBookings.length > 0) {
+                    const upcomingHeader = document.createElement('h2');
+                    upcomingHeader.className = 'text-xl font-semibold text-slate-800 mb-4';
+                    upcomingHeader.textContent = 'Upcoming Appointments';
+                    bookingsListEl.appendChild(upcomingHeader);
+                    upcomingBookings.forEach(booking => bookingsListEl.appendChild(createBookingCard(booking, false)));
+                }
+
+                if (pastBookings.length > 0) {
+                    const pastHeader = document.createElement('h2');
+                    pastHeader.className = 'text-xl font-semibold text-slate-800 mt-8 mb-4';
+                    pastHeader.textContent = 'Past Appointments';
+                    bookingsListEl.appendChild(pastHeader);
+                    pastBookings.forEach(booking => bookingsListEl.appendChild(createBookingCard(booking, true)));
+                }
+            }
+
+            function createBookingCard(booking, isPast) {
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-xl shadow-lg shadow-slate-200/50 flex items-center gap-5 ${isPast ? 'opacity-60' : ''}`;
+                const date = new Date(booking.date);
+                const day = date.getDate();
+                const month = date.toLocaleString('default', { month: 'short' });
+
+                card.innerHTML = `
+                    <div class="flex flex-col items-center justify-center bg-blue-50 text-blue-700 font-bold p-3 rounded-lg w-20 h-20">
+                        <span class="text-3xl">${day}</span>
+                        <span class="text-sm">${month.toUpperCase()}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-slate-900">${booking.hospital.name}</h3>
+                        <p class="text-slate-600">Appointment with ${booking.patientName}</p>
+                        <div class="mt-2 text-sm text-slate-500 flex items-center gap-4">
+                            <span><i class="ph-fill ph-clock align-middle mr-1"></i>${booking.time}</span>
+                            <span><i class="ph-fill ph-map-pin align-middle mr-1"></i>${booking.hospital.city}</span>
+                        </div>
+                    </div>
+                `;
+                return card;
+            }
+
+
+            // --- FUNCTIONS ---
+            function checkSelections() {
+                findHospitalsBtn.disabled = !(selectedCity && selectedType);
+            }
+
+            function populateStates() {
+                // Sort states alphabetically before populating
+                const sortedStates = Object.keys(locations).sort();
+                sortedStates.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    stateSelect.appendChild(option);
+                });
+            }
+
+            function populateCities(state) {
+                citySelect.innerHTML = '<option value="">Select a City</option>';
+                if (state && locations[state]) {
+                    // Sort cities alphabetically
+                    const sortedCities = locations[state].sort();
+                    sortedCities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                    citySelect.disabled = false;
+                } else {
+                    citySelect.disabled = true;
+                }
+            }
+            
+            function populateHospitalTypes() {
+                hospitalTypes.forEach(type => {
+                    const button = document.createElement('button');
+                    button.textContent = type;
+                    button.dataset.type = type;
+                    button.className = 'p-2 border border-slate-300 rounded-lg text-sm text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-200';
+                    hospitalTypeGrid.appendChild(button);
+                });
+            }
+            
+            function renderFilteredHospitals() {
+                hospitalListEl.innerHTML = '';
+                let filtered = hospitals.filter(h => h.city === selectedCity && h.type === selectedType);
+                
+                dashboardSubtitle.textContent = `Showing ${selectedType} hospitals in ${selectedCity}, ${selectedState}.`;
+
+                // --- Sorting Logic ---
+                if (currentSort === 'distance') {
+                    filtered.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+                    sortDistanceBtn.classList.add('active');
+                    sortFeesBtn.classList.remove('active');
+                } else if (currentSort === 'fees') {
+                    filtered.sort((a, b) => a.fees - b.fees);
+                    sortFeesBtn.classList.add('active');
+                    sortDistanceBtn.classList.remove('active');
+                } else {
+                    sortDistanceBtn.classList.remove('active');
+                    sortFeesBtn.classList.remove('active');
+                }
+
+                if (filtered.length === 0) {
+                    hospitalListEl.innerHTML = `<div class="p-4 text-center text-slate-500">No hospitals found matching your criteria.</div>`;
+                    return;
+                }
+
+                filtered.forEach((hospital, index) => {
+                    const hospitalCard = document.createElement('div');
+                    hospitalCard.className = 'p-4 border border-slate-200 rounded-xl hover:shadow-md hover:border-blue-300 transition-all';
+                    hospitalCard.innerHTML = `
+                        <div class="flex justify-between items-start gap-3">
+                            <div>
+                                <h4 class="font-semibold">${hospital.name}</h4>
+                                <div class="flex items-center gap-1 text-sm text-amber-500 my-1.5">
+                                    <i class="ph-fill ph-star"></i>
+                                    <span class="font-bold text-slate-700">${hospital.rating}</span>
+                                    <span class="text-slate-500">(${hospital.reviews} reviews)</span>
+                                </div>
+                                <div class="mt-2 space-y-1 text-sm text-slate-600">
+                                   <p><i class="ph-fill ph-phone align-middle text-slate-400 mr-1"></i> ${hospital.phone}</p>
+                                   <p><i class="ph-fill ph-clock align-middle text-slate-400 mr-1"></i> ${hospital.timings}</p>
+                                   <p><i class="ph-fill ph-map-pin align-middle text-slate-400 mr-1"></i> ${hospital.distance} away</p>
+                                   <p><i class="ph-fill ph-currency-inr align-middle text-slate-400 mr-1"></i> ₹${hospital.fees} Visiting Fee</p>
+                                </div>
+                            </div>
+                            <button data-hospital-name="${hospital.name}" class="book-btn text-xs bg-blue-500 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap">Book</button>
+                        </div>
+                    `;
+                    hospitalListEl.appendChild(hospitalCard);
+                });
+            }
+
+            function renderCalendar() { /* ... unchanged ... */ }
+            function renderTimeSlots() { /* ... unchanged ... */ }
+            
+            // --- EVENT LISTENERS ---
+            myBookingsBtn.addEventListener('click', () => {
+                selectionInterface.classList.add('hidden');
+                dashboardInterface.classList.add('hidden');
+                bookingsInterface.classList.remove('hidden');
+                renderBookings();
+            });
+
+            backToMainFromBookingsBtn.addEventListener('click', () => {
+                bookingsInterface.classList.add('hidden');
+                selectionInterface.classList.remove('hidden');
+            });
+
+            stateSelect.addEventListener('change', (e) => {
+                selectedState = e.target.value;
+                selectedCity = null;
+                populateCities(selectedState);
+                citySelect.value = '';
+                checkSelections();
+            });
+
+            citySelect.addEventListener('change', (e) => {
+                selectedCity = e.target.value;
+                checkSelections();
+            });
+            
+            hospitalTypeGrid.addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    const type = e.target.dataset.type;
+                    if (selectedType === type) {
+                        selectedType = null;
+                        e.target.classList.remove('selected-card', 'bg-blue-100');
+                    } else {
+                        selectedType = type;
+                        hospitalTypeGrid.querySelectorAll('button').forEach(btn => btn.classList.remove('selected-card', 'bg-blue-100'));
+                        e.target.classList.add('selected-card', 'bg-blue-100');
+                    }
+                    checkSelections();
+                }
+            });
+            
+            findHospitalsBtn.addEventListener('click', () => {
+                selectionInterface.classList.add('hidden');
+                dashboardInterface.classList.remove('hidden');
+                currentSort = 'default'; // Reset sort on new search
+                renderFilteredHospitals();
+            });
+
+            backToSelectionBtn.addEventListener('click', () => {
+                dashboardInterface.classList.add('hidden');
+                selectionInterface.classList.remove('hidden');
+                schedulerEl.classList.add('opacity-40', 'pointer-events-none');
+                schedulerPromptEl.classList.remove('hidden');
+                selectedHospital = null;
+                currentSort = 'default';
+            });
+
+            hospitalListEl.addEventListener('click', (e) => {
+                if (e.target.classList.contains('book-btn')) {
+                    const hospitalName = e.target.dataset.hospitalName;
+                    const hospitalCity = e.target.closest('.p-4').querySelector('p:nth-of-type(3)').textContent.includes(selectedCity)
+                    
+                    selectedHospital = hospitals.find(h => h.name === hospitalName && h.city === selectedCity);
+
+                    schedulerEl.classList.remove('opacity-40', 'pointer-events-none');
+                    schedulerPromptEl.classList.add('hidden');
+                    alert(`Selected ${selectedHospital.name}. Please now choose a date and time.`);
+                    document.getElementById('scheduler').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+
+            sortDistanceBtn.addEventListener('click', () => {
+                currentSort = 'distance';
+                renderFilteredHospitals();
+            });
+
+            sortFeesBtn.addEventListener('click', () => {
+                currentSort = 'fees';
+                renderFilteredHospitals();
+            });
+            
+            bookingFormEl.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const patientName = document.getElementById('patient-name').value;
+                if (!patientName) return;
+
+                const bookingDetails = {
+                    patientName: patientName,
+                    hospital: selectedHospital,
+                    date: selectedDate.toISOString(),
+                    time: selectedTime
+                };
+                saveBooking(bookingDetails);
+
+                const dateString = selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                confirmationDetailsEl.innerHTML = `
+                    For: <strong>${patientName}</strong><br>
+                    At: <strong>${selectedHospital.name}</strong><br>
+                    On: <strong>${dateString} at ${selectedTime}</strong>
+                `;
+                modalEl.classList.remove('hidden');
+            });
+            
+            closeModalBtn.addEventListener('click', () => {
+                modalEl.classList.add('hidden');
+                selectedDate = null;
+                selectedTime = null;
+                selectedHospital = null;
+                bookingFormEl.reset();
+                bookingFormContainerEl.classList.add('hidden');
+                schedulerEl.classList.add('opacity-40', 'pointer-events-none');
+                schedulerPromptEl.classList.remove('hidden');
+                renderCalendar();
+                renderTimeSlots();
+            });
+
+            // ---UNCHANGED CALENDAR & TIMESLOT LOGIC ---
+             function renderCalendar() {
+                calendarGridEl.innerHTML = '';
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+
+                monthYearEl.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                daysOfWeek.forEach(day => {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'font-bold text-slate-500';
+                    dayEl.textContent = day;
+                    calendarGridEl.appendChild(dayEl);
+                });
+                
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    calendarGridEl.appendChild(document.createElement('div'));
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('button');
+                    dayEl.textContent = day;
+                    dayEl.className = 'p-2 rounded-full hover:bg-slate-100 transition-colors';
+
+                    const today = new Date();
+                    const date = new Date(year, month, day);
+
+                    if (date.setHours(0,0,0,0) < today.setHours(0,0,0,0)) {
+                        dayEl.disabled = true;
+                        dayEl.classList.add('text-slate-300', 'cursor-not-allowed');
+                    } else if (selectedDate && date.getTime() === selectedDate.getTime()) {
+                        dayEl.classList.add('bg-blue-600', 'text-white', 'font-semibold');
+                    } else if (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()) {
+                         dayEl.classList.add('text-blue-600', 'font-bold');
+                    }
+
+                    dayEl.addEventListener('click', () => {
+                        selectedDate = new Date(year, month, day);
+                        selectedTime = null;
+                        renderCalendar();
+                        renderTimeSlots();
+                    });
+                    calendarGridEl.appendChild(dayEl);
+                }
+            }
+            
+            function renderTimeSlots() {
+                timeSlotsEl.innerHTML = '';
+                if (!selectedDate) {
+                    timeSlotPromptEl.classList.remove('hidden');
+                    bookingFormContainerEl.classList.add('hidden');
+                    return;
+                }
+                
+                timeSlotPromptEl.classList.add('hidden');
+                timeSlotsData.forEach(time => {
+                    const timeSlotBtn = document.createElement('button');
+                    timeSlotBtn.textContent = time;
+                    timeSlotBtn.className = 'border border-slate-300 py-2 rounded-lg text-sm hover:border-blue-500 hover:bg-blue-50 transition-colors';
+                    if (time === selectedTime) {
+                        timeSlotBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                    }
+                    timeSlotBtn.addEventListener('click', () => {
+                        selectedTime = time;
+                        renderTimeSlots();
+                        if (selectedHospital) {
+                            bookingFormContainerEl.classList.remove('hidden');
+                        } else {
+                            alert("Please select a hospital first by clicking the 'Book' button.");
+                            selectedTime = null; // reset time selection
+                            renderTimeSlots();
+                        }
+                    });
+                    timeSlotsEl.appendChild(timeSlotBtn);
+                });
+            }
+            
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            // --- INITIALIZATION ---
+            loadBookings();
+            populateStates();
+            populateHospitalTypes();
+            renderCalendar();
+        });
+    </script>
+</body>
+</html>
+
